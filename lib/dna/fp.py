@@ -1,7 +1,6 @@
 # Definitions for standard functions from functional programming
 
 # 1. Currying
-
 # Code to curry functions a la Ruby or Lisp
 # Class taken from http://code.activestate.com/recipes/
 # 52549-curry-associating-parameters-with-a-function/
@@ -18,11 +17,9 @@ class curry:
         return self.fun(*a, **self.kwargs)
 
 # 2. Zipmap
-
 def zipmap(f, coll):
     return dict(zip(coll, map(f, coll)))
 
 # 3. Functional interpolation
-
 def interpolate(string, info_map):
     return string % info_map
