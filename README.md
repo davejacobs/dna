@@ -5,4 +5,4 @@ This is the beginning of a library I'm developing to work with DNA and molecular
 
 I've refactored this code recently, especially to remove sensitive information. I have not had access yet to fully test the refactored code on real data, so I'm not guaranteeing that everything works at the moment.
 
-If this code becomes sufficiently general, I'll consider publishing it as a gem.
+If this code becomes sufficiently general, I'll consider publishing it as a library.
