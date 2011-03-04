@@ -173,7 +173,7 @@ class Gene:
             primers.update(p)
         return primers
 
-    # Returns has representation of gene, so that we can interpolate
+    # Returns hash representation of gene, so that we can interpolate
     # gene data into templates
     def as_hash(self):
         gi, strand, start, end = self.coordinates
