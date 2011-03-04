@@ -1,0 +1,99 @@
+﻿%(name)s
+====
+
+Basics
+------
+
+Name: %(name)s
+Code: %(gid)s
+Accession: %(gi)s Region: %(start)s:%(end)s (strand %(strand)s)
+Product: %(description)s
+
+Sequence
+--------
+
+%(sequence)s
+
+Knockout primers
+----------------
+
+*Note*: these primers have 50nt homology with flanking genes and 20-21nt
+homology with pKD4
+
+Forward:
+
+  %(homology-forward)s
+	
+Reverse: 
+
+  %(homology-reverse)s
+  
+Deletion confirmation primers
+-----------------------------
+
+Forward, internal:
+
+  %(internal-forward)s
+  
+Reverse, internal:
+
+  %(internal-reverse)s
+  
+Forward, external:
+
+  %(external-forward)s
+  
+Reverse, external:
+
+  %(external-reverse)s
+
+Sequence results
+----------------
+
+### Forward ###
+  
+1. 
+
+2. 
+
+3. 
+
+### Reverse ###
+
+1. 
+
+2. 
+
+3. 
+  
+  
+Sequence results analysis
+-------------------------
+
+### Forward ###
+
+Predicted sequence:
+
+  gtgtaggctggagctgcttcgaagttcctatactttctagagaataggaacttcggaataggaac
+  taaggaggatattcatatg
+
+Legend:
+
+Results:
+
+1. 
+  
+### Reverse complement ###  
+
+Predicted sequence:
+
+
+  catatgaatatcctcctta 
+  gttcctattccgaagttcctattctctagaaagtataggaacttcgaagcagctccagcctacac
+
+  
+Results:
+
+1. 
+
+2. 

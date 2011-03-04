@@ -1,0 +1,190 @@
+#!/usr/bin/env python
+
+# Standard modules
+import sys
+import os.path
+from copy import copy
+
+curr_path = os.path.dirname(__file__)
+lib_path = os.path.join(curr_path, '../lib')
+sys.path.append(lib_path)
+
+# Biopython modules
+from Bio import Entrez
+from Bio.Seq import Seq
+
+# My library modules
+from dna.fp import curry, zipmap, interpolate
+from dna.cache import *
+from dna.gene import *
+from dna.sequence import *
+
+# Constants, options and templates
+project = {
+    'name': 'Typhi Knockouts',
+    'researcher': 'David Jacobs',
+    'root': (os.getcwd() + '/'),
+    'bacterial_strain': sys.argv[1],
+    'gene_file': 'Genes.yml',
+    'template_file': 'templates/Gene.txt'
+}
+
+experiment = {
+    'genes': sys.argv[2:],
+    'carrier_vector': 'pKD4',
+    'forward_homology': 'GTGTAGGCTGGAGCTGCTTC',
+    'reverse_homology': 'TAAGGAGGATATTCATATG',
+    'recombinant_vector': 'pCP20',
+    'scar': 'gtgtaggctggagctgcttcgaagttcctatactttc' + \
+            'tagagaataggaacttcggaataggaac<deletion>taaggaggatattcatatg'
+}
+
+order_template = '%(sequence)s,%(name)s,%(memo)s'
+detailed_order_template = '%(sequence)s,%(name)s,%(researcher)s,50N,,,DSL,,%(memo)s'
+
+primer3_template = \
+"""PRIMER_SEQUENCE_ID=%(name)s
+SEQUENCE=%(sequence)s
+EXCLUDED_REGION=%(excluded_start)s,%(excluded_length)s
+=
+"""
+
+# Primer search and selection functions
+
+def homology_primers(gene, length=50, space='', relative_location='upstream'):
+    gi, strand, start, end = gene.coordinates
+    
+    upstream_homology = Sequence(gi, strand, start-length, start-1).sequence
+    downstream_homology = Sequence(gi, strand, end+1, end+length).sequence
+
+    # If we're on the negative strand, then our start and end
+    # calculations were switched -- so switch the homologous
+    # regions before adding any other sequences to them.
+    if strand == 'minus':
+        upstream_homology, downstream_homology = \
+                downstream_homology, upstream_homology
+
+    upstream_homology += space + experiment['forward_homology']
+    downstream_homology = str(Seq(experiment['reverse_homology'] + space + \
+            downstream_homology).reverse_complement())
+
+    if relative_location == 'upstream':
+        return upstream_homology
+    elif relative_location == 'downstream':
+        return downstream_homology
+    else:
+        return None
+
+def with_homology_primers(gene):
+    gene_copy = copy(gene)
+
+    upstream_seq = homology_primers(gene, relative_location='upstream')
+    downstream_seq = homology_primers(gene, relative_location='downstream')
+
+    gene_copy.primers['homology-forward'] = upstream_seq
+    gene_copy.primers['homology-reverse'] = downstream_seq
+    
+    return gene_copy
+
+# Stub
+def with_internal_primers(gene):
+    gene_copy = copy(gene)
+
+    gi, strand, start, end = gene.coordinates
+    sequence = Sequence(gi, strand, start, end)
+
+    gene_copy.primers['internal-forward'] = sequence.forward_primer()
+    gene_copy.primers['internal-reverse'] = sequence.reverse_primer()
+
+    return gene_copy
+
+# Stub
+def with_external_primers(gene):
+    gene_copy = copy(gene)
+
+    gi, strand, start, end = gene.coordinates
+    upstream_sequence = Sequence(gi, strand, start-500, start-1)
+    downstream_sequence = Sequence(gi, strand, end+1, end+500)
+
+    gene_copy.primers['external-forward'] = upstream_sequence.forward_primer()
+    gene_copy.primers['external-reverse'] = downstream_sequence.reverse_primer()
+
+    return gene_copy
+
+# Get a map of info for each value in the map `gene` whose key
+# contains the word 'primer'. Translate that primer information (i.e., the
+# gene it is a primer for, along with its sequence) into a new array
+# of maps.
+def as_csv(gene, template=order_template):
+    primers = []
+    for primer in gene.primers.keys():
+        entry = {
+            'name': primer,
+            'sequence': gene.primers[primer],
+            'memo': ''
+        }
+
+        primers.append(entry)
+
+    return '\n'.join([order_template % p for p in primers])
+
+# Side-effect functions and I/O
+
+def create_gene_report(gene):
+    template_file = project['root'] + project['template_file']
+    if os.path.isfile(template_file):
+        with open(template_file, 'r') as f:
+            template = f.read()
+
+        return template % gene.as_hash()
+
+    else:
+        exit('[error] no template file found')
+
+# Main program
+
+Entrez.email = 'email+here@mail.com'
+
+load_cache()
+
+results_file = project['root'] + 'Results.yml'
+genes = zipmap(Gene, set(experiment['genes']))
+genes = map(with_homology_primers, genes.values())
+genes = map(with_internal_primers, genes)
+genes = map(with_external_primers, genes)
+
+print 'Order these primers:'
+print
+
+for gene in genes:
+    print gene.name
+    print
+    print '  Homology'
+    print
+    print '    fwd:', gene.primers['homology-forward']
+    print '    rev:', gene.primers['homology-reverse']
+    print
+    print '  Internal deletion confirmation'
+    print
+    print '    fwd:', gene.primers['internal-forward']
+    print '    rev:', gene.primers['internal-reverse']
+    print 
+    print '  External deletion confirmation'
+    print
+    print '    fwd:', gene.primers['external-forward']
+    print '    rev:', gene.primers['external-reverse']
+    print
+    print '------------------------------'
+    print
+
+    report = create_gene_report(gene)
+    with open(project['root'] + gene.name + '.txt', 'w') as f:
+        f.write(report)
+
+if raw_input('Generate primer order? ') == 'y':
+    for gene in genes:
+        print
+        print as_csv(gene)
+        print
+
+save_cache()

@@ -1,0 +1,4 @@
+PRIMER_SEQUENCE_ID=%(name)s
+SEQUENCE=%(sequence)s
+EXCLUDED_REGION=%(excluded_start)s,%(excluded_length)s
+=
