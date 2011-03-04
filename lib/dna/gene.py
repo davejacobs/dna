@@ -125,7 +125,7 @@ class Gene:
         else:
             return None
 
-    # Returns the homology primers for a gene
+    # Returns the homology primers for a gene as a map
     def homology_primers(self, length=50):
         upstream = self.homology_primer('upstream', length)
         downstream = self.homology_primer('downstream', length)
@@ -135,7 +135,8 @@ class Gene:
             'homology-reverse': downstream
         }
 
-    # Returns primers for detecting a gene
+    # Returns internal primers for detecting the presence of gene
+    # as a map
     def internal_primers(self):
         gi, strand, start, end = self.coordinates
         sequence = Sequence(gi, strand, start, end)
@@ -145,7 +146,7 @@ class Gene:
             'internal-reverse': sequence.reverse_primer()
         }
 
-    # Returns a external primer for a gene as a map. Distance
+    # Returns an external primer for gene as a map. Distance
     # out from gene defaults to 500 bp
     def external_primers(self, distance=500):
         gi, strand, start, end = self.coordinates
@@ -157,20 +158,23 @@ class Gene:
             'external-reverse': downstream.reverse_primer()
         }
 
+    # Returns homology, internal and external primers for gene
+    # as a map
     def all_primers(self):
         homology = self.homology_primers()
         internal = self.internal_primers()
         external = self.external_primers()
 
         # Why doesn't this work?
-        # return reduce(dict.update, [homology, internal, external])
+        # return reduce(dict.update, [homology, internal, external], {})
 
         primers = {}
         for p in [homology, internal, external]:
             primers.update(p)
-
         return primers
 
+    # Returns has representation of gene, so that we can interpolate
+    # gene data into templates
     def as_hash(self):
         gi, strand, start, end = self.coordinates
         gene = {
@@ -184,7 +188,7 @@ class Gene:
             'sequence': self.sequence
         }
 
-        for primer in self.primers.keys():
-            gene[primer] = self.primers[primer]
+        for primer in self.primers.items():
+            gene[primer[0]] = primer[1]
 
         return gene
