@@ -6,6 +6,7 @@ import xml.etree.ElementTree as Tree
 # Biopython modules
 from Bio import Entrez
 from Bio import SeqIO
+from Bio.Seq import Seq
 
 # Library modules
 from dna.cache import *
@@ -30,7 +31,7 @@ class Gene:
         self.coordinates = self.retrieve_coordinates()
         self.sequence = self.retrieve_sequence()
 
-        self.primers = {}
+        self.primers = self.all_primers()
       
     def retrieve_gid(self):
         if self.name in cache['genes']:
@@ -90,30 +91,85 @@ class Gene:
         gi, strand, start, end = self.coordinates
         return str(Sequence(gi, strand, start, end))
 
-    def retrieve_sequence_old(self):
-        # Get the pertinent information from the parameters or
-        # look them up based on the gene ID
-        if not self.coordinates:
-            return
-              
-        if self.coordinates in cache['sequences']:
-            return cache['sequences'][self.coordinates]
-
-        # Look up the sequence
+    # Primer search and selection functions 
+    # Constructs primers that will prime our plasmid (pKD4) and will have
+    # extensions that are homologous with the regions of DNA that flank
+    # gene.
+    def homology_primer(self, relative_location='upstream', length=50, space=''):
         gi, strand, start, end = self.coordinates
+        
+        upstream = str(Sequence(gi, strand, start-length, start-1))
+        downstream = str(Sequence(gi, strand, end+1, end+length))
 
-        # Normalize the strands: plus = 1, minus=2
-        strand = {'plus': 1, 'minus': 2}[strand.lower()]
+        # Temporary solution to experimental parameters
+        # (NOT final or how I would like it)
+        experiment = {
+            'forward_homology': 'GTGTAGGCTGGAGCTGCTTC',
+            'reverse_homology': 'TAAGGAGGATATTCATATG'
+        }
 
-        handle = Entrez.efetch(db='nucleotide', rettype='fasta', id=gi,
-            seq_start=start, seq_stop=end, strand=strand)
+        # If we're on the negative strand, then our start and end
+        # calculations were switched -- so switch the homologous
+        # regions before adding any other sequences to them.
+        if strand == 'minus':
+            upstream, downstream = downstream, upstream
 
-        # Read, cache and return the sequence
-        entry = SeqIO.read(handle, 'fasta')
-        sequence = str(entry.seq)
-        cache['sequences'][self.coordinates] = sequence
+        upstream += space + experiment['forward_homology']
+        downstream = str(Seq(experiment['reverse_homology'] + space + \
+                downstream).reverse_complement())
 
-        return sequence
+        if relative_location == 'upstream':
+            return upstream
+        elif relative_location == 'downstream':
+            return downstream
+        else:
+            return None
+
+    # Returns the homology primers for a gene
+    def homology_primers(self, length=50):
+        upstream = self.homology_primer('upstream', length)
+        downstream = self.homology_primer('downstream', length)
+
+        return {
+            'homology-forward': upstream,
+            'homology-reverse': downstream
+        }
+
+    # Returns primers for detecting a gene
+    def internal_primers(self):
+        gi, strand, start, end = self.coordinates
+        sequence = Sequence(gi, strand, start, end)
+
+        return {
+            'internal-forward': sequence.forward_primer(),
+            'internal-reverse': sequence.reverse_primer()
+        }
+
+    # Returns a external primer for a gene as a map. Distance
+    # out from gene defaults to 500 bp
+    def external_primers(self, distance=500):
+        gi, strand, start, end = self.coordinates
+        upstream = Sequence(gi, strand, start-distance, start-1)
+        downstream = Sequence(gi, strand, end+1, end+distance)
+
+        return {
+            'external-forward': upstream.forward_primer(),
+            'external-reverse': downstream.reverse_primer()
+        }
+
+    def all_primers(self):
+        homology = self.homology_primers()
+        internal = self.internal_primers()
+        external = self.external_primers()
+
+        # Why doesn't this work?
+        # return reduce(dict.update, [homology, internal, external])
+
+        primers = {}
+        for p in [homology, internal, external]:
+            primers.update(p)
+
+        return primers
 
     def as_hash(self):
         gi, strand, start, end = self.coordinates

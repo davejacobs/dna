@@ -15,7 +15,6 @@ class curry:
     def __call__(self, *args, **kwargs):
         a = self.pending + args
         self.kwargs.update(kwargs)
-
         return self.fun(*a, **self.kwargs)
 
 # 2. Zipmap
@@ -27,5 +26,3 @@ def zipmap(f, coll):
 
 def interpolate(string, info_map):
     return string % info_map
-
-

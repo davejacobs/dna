@@ -1,4 +1,4 @@
-# cache.py - Cache values from Genbank in buckets so as not to duplicate calls
+# cache.py - Caches values from Genbank in buckets so as not to duplicate calls
 # Stores gene IDs, gene sequences, etc., separately
 
 import os

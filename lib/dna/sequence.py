@@ -2,9 +2,9 @@ from Bio import Entrez
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Seq import SeqRecord
+from Bio.Emboss import Primer3
 from Bio.Emboss.Applications import Primer3Commandline
 from dna.cache import *
-from dna.defaults import *
 
 class Sequence:
     def __init__(self, gi, strand, start, end):
@@ -26,10 +26,10 @@ class Sequence:
             return cache['sequences'][self.coordinates]
 
         # Normalize the strands: plus = 1, minus=2
-        self.strand = {'plus': 1, 'minus': 2}[self.strand.lower()]
+        strand = {'plus': 1, 'minus': 2}[self.strand.lower()]
 
         handle = Entrez.efetch(db='nucleotide', rettype='fasta', id=self.gi,
-            seq_start=self.start, seq_stop=self.end, strand=self.strand)
+            seq_start=self.start, seq_stop=self.end, strand=strand)
 
         # Read, cache and return the sequence
         entry = SeqIO.read(handle, 'fasta')
@@ -42,9 +42,7 @@ class Sequence:
         # Stub method because eprimer3 is not available on my local machine
         # at the moment
 
-        return 'stub-sequence'
-
-        tmp_file = defaults['tmp'] + self.gi + '-' + \
+        tmp_file = '/tmp/' + self.gi + '-' + \
                 self.strand + str(self.start) + str(self.end)
 
         primer3_input_file = tmp_file
