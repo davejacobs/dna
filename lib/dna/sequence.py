@@ -1,3 +1,6 @@
+# sequence.py - Convenience class for managing cached and remote
+# sequence data, and for finding primers.
+
 from Bio import Entrez
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -19,6 +22,8 @@ class Sequence:
     def __str__(self):
         return self.sequence
 
+    # Fetches its own sequence, first looking in the global cache
+    # and then resorting to Entrez eFetch.
     def retrieve_sequence(self):
         # Get the pertinent information from the parameters or
         # look them up based on the gene ID
@@ -38,6 +43,8 @@ class Sequence:
 
         return sequence
 
+    # Determines the optimal forward and reverse primers for its
+    # own sequence. Requires Primer3 (part of Emboss) to be installed.
     def primer(self, direction='forward'):
         tmp_file = '/tmp/' + self.gi + '-' + \
                 self.strand + str(self.start) + str(self.end)
@@ -74,8 +81,10 @@ class Sequence:
         else:
             return None
 
+    # Returns the first Primer3 forward primer match
     def forward_primer(self):
         return self.primer('forward')
 
+    # Returns the first Primer3 reverse primer match
     def reverse_primer(self):
         return self.primer('reverse')

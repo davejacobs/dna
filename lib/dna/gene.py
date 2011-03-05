@@ -1,4 +1,4 @@
-# genes.py - Wrappers around gene sequence functionality
+# gene.py - Wrapper around gene lookup functionality
 
 # Standard library modules
 import xml.etree.ElementTree as Tree
