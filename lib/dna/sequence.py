@@ -39,9 +39,6 @@ class Sequence:
         return sequence
 
     def primer(self, direction='forward'):
-        # Stub method because eprimer3 is not available on my local machine
-        # at the moment
-
         tmp_file = '/tmp/' + self.gi + '-' + \
                 self.strand + str(self.start) + str(self.end)
 
