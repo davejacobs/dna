@@ -30,10 +30,14 @@ class Gene:
         self.gid = self.retrieve_gid()
         self.coordinates = self.retrieve_coordinates()
         self.sequence = self.retrieve_sequence()
-        self.upstream_sequences = {}
-        self.downstream_sequences = {}
+
         self.upstream_sequence = self.retrieve_upstream_sequence(50)
         self.downstream_sequence = self.retrieve_downstream_sequence(50)
+
+        # Cached upstream and downstream sequences, where the length of
+        # the sequence is the key to the sequence
+        self.upstream_sequences = {}
+        self.downstream_sequences = {}
 
         self.primers = self.all_primers()
       
