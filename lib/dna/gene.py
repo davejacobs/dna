@@ -102,7 +102,8 @@ class Gene:
     def retrieve_upstream_sequence(self, length=50):
         # Look to see if we've already memoized this sequence
         # in our object
-        if upstream = self.upstream_sequences[length]
+        upstream = self.upstream_sequences[length]
+        if upstream
             return upstream
 
         # Else look up the sequence per the normal lookup (which
@@ -116,7 +117,8 @@ class Gene:
     def retrieve_downstream_sequence(self, length=50:
         # Look to see if we've already memoized this sequence
         # in our object
-        if downstream = self.downstream_sequences[length]
+        downstream = self.downstream_sequences[length]
+        if downstream
             return downstream
 
         # Else look up the sequence per the normal lookup (which
