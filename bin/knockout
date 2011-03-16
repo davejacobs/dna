@@ -42,8 +42,9 @@ project = {
     'root': os.getcwd() + '/',
     'bacterial_strain': sys.argv[1],
     'gene_file': 'Genes.yml',
-    'template_file': 'templates/gene.txt'
+    'template_file': os.path.abspath(os.path.dirname(__file__ + '/../../..')) + '/templates/gene.txt'
 }
+print "template file is", os.path.abspath(project['template_file'])
 
 experiment = {
     'genes': sys.argv[2:],
