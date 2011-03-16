@@ -9,10 +9,17 @@ Code: %(gid)s
 Accession: %(gi)s Region: %(start)s:%(end)s (strand %(strand)s)
 Product: %(description)s
 
-Sequence
---------
+Sequences
+---------
 
+Upstream sequence:
+%(upstream)s
+
+Gene sequence:
 %(sequence)s
+
+Downstream sequence:
+%(downstream)s
 
 Knockout primers
 ----------------
