@@ -30,6 +30,8 @@ class Gene:
         self.gid = self.retrieve_gid()
         self.coordinates = self.retrieve_coordinates()
         self.sequence = self.retrieve_sequence()
+        self.upstream_sequence = {}
+        self.downstream_sequence = {}
 
         self.primers = self.all_primers()
       
@@ -90,6 +92,34 @@ class Gene:
     def retrieve_sequence(self):
         gi, strand, start, end = self.coordinates
         return str(Sequence(gi, strand, start, end))
+
+    def retrieve_upstream_sequence(self, length=50):
+        # Look to see if we've already memoized this sequence
+        # in our object
+        if upstream = self.upstream_sequence[length]
+            return upstream
+
+        # Else look up the sequence per the normal lookup (which
+        # will first try the cache and then ping Genbank
+        gi, strand, start, end = self.coordinates
+        upstream = self.upstream_sequence[length] = \
+                str(Sequence(gi, strand, start-(length+1), start-1))
+
+        return upstream
+
+    def retrieve_downstream_sequence(self, length=50:
+        # Look to see if we've already memoized this sequence
+        # in our object
+        if downstream = self.downstream_sequence[length]
+            return downstream
+
+        # Else look up the sequence per the normal lookup (which
+        # will first try the cache and then ping Genbank
+        gi, strand, start, end = self.coordinates
+        downstream = self.downstream_sequence[length] = \
+                str(Sequence(gi, strand, end+1, end+length+1))
+
+        return downstream
 
     # Primer search and selection functions 
     # Constructs primers that will prime our plasmid (pKD4) and will have
