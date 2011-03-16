@@ -31,13 +31,13 @@ class Gene:
         self.coordinates = self.retrieve_coordinates()
         self.sequence = self.retrieve_sequence()
 
-        self.upstream_sequence = self.retrieve_upstream_sequence(50)
-        self.downstream_sequence = self.retrieve_downstream_sequence(50)
-
         # Cached upstream and downstream sequences, where the length of
         # the sequence is the key to the sequence
         self.upstream_sequences = {}
         self.downstream_sequences = {}
+
+        self.upstream_sequence = self.retrieve_upstream_sequence(50)
+        self.downstream_sequence = self.retrieve_downstream_sequence(50)
 
         self.primers = self.all_primers()
       
@@ -102,9 +102,8 @@ class Gene:
     def retrieve_upstream_sequence(self, length=50):
         # Look to see if we've already memoized this sequence
         # in our object
-        upstream = self.upstream_sequences[length]
-        if upstream:
-            return upstream
+        if length in self.upstream_sequences:
+            return self.upstream_sequences[length]
 
         # Else look up the sequence per the normal lookup (which
         # will first try the cache and then ping Genbank
@@ -114,12 +113,11 @@ class Gene:
 
         return upstream
 
-    def retrieve_downstream_sequence(self, length=50:
+    def retrieve_downstream_sequence(self, length=50):
         # Look to see if we've already memoized this sequence
         # in our object
-        downstream = self.downstream_sequences[length]
-        if downstream:
-            return downstream
+        if length in self.downstream_sequences:
+            return self.downstream_sequences[length]
 
         # Else look up the sequence per the normal lookup (which
         # will first try the cache and then ping Genbank
