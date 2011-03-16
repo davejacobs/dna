@@ -30,8 +30,10 @@ class Gene:
         self.gid = self.retrieve_gid()
         self.coordinates = self.retrieve_coordinates()
         self.sequence = self.retrieve_sequence()
-        self.upstream_sequence = {}
-        self.downstream_sequence = {}
+        self.upstream_sequences = {}
+        self.downstream_sequences = {}
+        self.upstream_sequence = self.retrieve_upstream_sequence(50)
+        self.downstream_sequence = self.retrieve_downstream_sequence(50)
 
         self.primers = self.all_primers()
       
@@ -96,13 +98,13 @@ class Gene:
     def retrieve_upstream_sequence(self, length=50):
         # Look to see if we've already memoized this sequence
         # in our object
-        if upstream = self.upstream_sequence[length]
+        if upstream = self.upstream_sequences[length]
             return upstream
 
         # Else look up the sequence per the normal lookup (which
         # will first try the cache and then ping Genbank
         gi, strand, start, end = self.coordinates
-        upstream = self.upstream_sequence[length] = \
+        upstream = self.upstream_sequences[length] = \
                 str(Sequence(gi, strand, start-(length+1), start-1))
 
         return upstream
@@ -110,13 +112,13 @@ class Gene:
     def retrieve_downstream_sequence(self, length=50:
         # Look to see if we've already memoized this sequence
         # in our object
-        if downstream = self.downstream_sequence[length]
+        if downstream = self.downstream_sequences[length]
             return downstream
 
         # Else look up the sequence per the normal lookup (which
         # will first try the cache and then ping Genbank
         gi, strand, start, end = self.coordinates
-        downstream = self.downstream_sequence[length] = \
+        downstream = self.downstream_sequences[length] = \
                 str(Sequence(gi, strand, end+1, end+length+1))
 
         return downstream
@@ -128,8 +130,8 @@ class Gene:
     def homology_primer(self, relative_location='upstream', length=50, space=''):
         gi, strand, start, end = self.coordinates
         
-        upstream = str(Sequence(gi, strand, start-length, start-1))
-        downstream = str(Sequence(gi, strand, end+1, end+length))
+        upstream = self.retrieve_upstream_sequence(length)
+        downstream = self.retrieve_downstream_sequence(length)
 
         # Temporary solution to experimental parameters
         # (NOT final or how I would like it)
@@ -215,7 +217,9 @@ class Gene:
             'start': start,
             'end': end,
             'description': self.name,
-            'sequence': self.sequence
+            'sequence': self.sequence,
+            'upstream': self.upstream_sequence,
+            'downstream': self.downstream_sequence
         }
 
         for primer in self.primers.items():
