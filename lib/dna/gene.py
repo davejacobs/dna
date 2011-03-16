@@ -103,7 +103,7 @@ class Gene:
         # Look to see if we've already memoized this sequence
         # in our object
         upstream = self.upstream_sequences[length]
-        if upstream
+        if upstream:
             return upstream
 
         # Else look up the sequence per the normal lookup (which
@@ -118,7 +118,7 @@ class Gene:
         # Look to see if we've already memoized this sequence
         # in our object
         downstream = self.downstream_sequences[length]
-        if downstream
+        if downstream:
             return downstream
 
         # Else look up the sequence per the normal lookup (which
